@@ -1,0 +1,5 @@
+streamlit==1.24.0
+pandas==1.5.3
+plotly==5.13.1
+openpyxl==3.0.9
+SQLite3==2.6.0 
