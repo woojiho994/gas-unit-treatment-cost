@@ -67,7 +67,8 @@ def main():
             filtered_df.groupby("地区")["单位治理成本（元/吨）"].mean().reset_index(),
             x="地区",
             y="单位治理成本（元/吨）",
-            title="各地区平均治理成本"
+            title="各地区平均治理成本",
+            color_discrete_sequence=['lightblue']  # 设置浅蓝色
         )
         st.plotly_chart(fig_region, use_container_width=True)
     
@@ -77,7 +78,8 @@ def main():
             filtered_df.groupby("所属行业")["单位治理成本（元/吨）"].mean().reset_index(),
             x="所属行业",
             y="单位治理成本（元/吨）",
-            title="各行业平均治理成本"
+            title="各行业平均治理成本",
+            color_discrete_sequence=['lightblue']  # 设置浅蓝色
         )
         st.plotly_chart(fig_industry, use_container_width=True)
     
@@ -91,7 +93,8 @@ def main():
                 format="¥%.2f"
             )
         },
-        hide_index=True
+        hide_index=True,
+        use_container_width=True  # 设置表格宽度占满容器
     )
     
     # 数据下载
@@ -102,6 +105,37 @@ def main():
         file_name="废气治理成本数据.csv",
         mime="text/csv"
     )
+    
+    # 成本估算功能
+    # 成本估算功能
+    st.header("成本估算")
+    st.write("根据您的行业和污染物类型，deepseek帮你估算治理成本")
+    
+    # 创建两列布局
+    est_col1, est_col2 = st.columns(2)
+    
+    with est_col1:
+        industry_input = st.text_input("请输入行业类型", "")
+    
+    with est_col2:
+        pollutant_input = st.selectbox("请选择污染物类型", options=df["污染物类型"].unique().tolist())
+    
+    if st.button("获取成本估算"):
+        if industry_input and pollutant_input:
+            try:
+                with st.spinner("正在分析中..."):
+                    # 创建成本估算器实例
+                    from cost_estimation import CostEstimator
+                    estimator = CostEstimator('废气处理.xlsx')
+                    result = estimator.get_cost_estimation(industry_input, pollutant_input)
+                    # 显示结果
+                    st.success("分析完成！")
+                    st.subheader("分析结果")
+                    st.write(result)
+            except Exception as e:
+                st.error(f"发生错误: {e}")
+        else:
+            st.warning("请输入行业类型和污染物类型")
 
 if __name__ == "__main__":
     main() 
